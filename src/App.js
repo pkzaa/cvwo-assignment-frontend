@@ -1,25 +1,65 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import { Button, Checkbox, Collection, CollectionItem } from "react-materialize";
+// import { Navbar, NavItem, Icon } from "react-materialize";
 
-function App() {
+import { Navbar, NavSearch, NavButton } from "./deps/Navbar"
+
+import Main from "./routes/Main";
+import Login from "./routes/Login";
+import Logout from "./routes/Logout";
+import Edit from "./routes/Edit";
+
+// We need these for MaterializeCSS
+import "./deps/MaterialIcons.css";
+import "./deps/materialize.min.css";
+import "./App.css";
+
+/*
+ * MaterializeCSS references:
+ * https://materializecss.com/
+ * https://react-materialize.github.io
+ */
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+        <Routes>
+            <Route path="/" element={<Main />} />
+            <Route path="/edit/:taskID" element={<Edit />} />
+            <Route path="about" element={<About />} />
+            <Route path="login" element={<Login />} />
+            <Route path="logout" element={<Logout />} />
+            <Route path="*" element={<Main />} />
+        </Routes>
+    </>
   );
 }
 
-export default App;
+function Home() {
+  return (
+    <>
+      <main>
+        <h2>Welcome to the homepage!</h2>
+        <p>You can do this, I believe in you.</p>
+      </main>
+      <nav>
+        <Link to="/about">About</Link>
+      </nav>
+    </>
+  );
+}
+
+const About = (props) => (
+    <>
+    <Collection>
+        <CollectionItem><Checkbox filledIn label="yes" value="yeah" /></CollectionItem>
+        <CollectionItem><Checkbox filledIn label="no"  value="nah"  /></CollectionItem>
+    </Collection>
+    <Navbar logo="CVTasks">
+            <Link to="/">Home</Link>
+            <NavSearch />
+            <NavButton>Login</NavButton>
+        </Navbar>
+    </>
+);
