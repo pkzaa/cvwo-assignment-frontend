@@ -6,11 +6,11 @@ export default function TaskEntry(props) {
   return (
     <CollectionItem href={`/edit/${props.id}`} title="Click to expand">
     {props.children}
-        <a className="secondary-content">
+        <div className="secondary-content">
           <Icon>
             chevron_right
           </Icon>
-        </a>
+        </div>
     </CollectionItem>
   )
 };

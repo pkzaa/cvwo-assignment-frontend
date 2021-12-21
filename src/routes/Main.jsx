@@ -31,12 +31,42 @@ export default function Main(props) {
   )
 };
 
-function TaskList(props) {
-  return (
-    <Collection>
-      {Array(20).fill("pfft").map(
-        (v, i) => <TaskEntry id={i}>Haha task {i}</TaskEntry>)
-      }
-    </Collection>
-  )
+function fakefetch(a, b) {
+    return new Promise((resolve, reject) => {
+      resolve(["a", "b", "c"]); // Array(20).fill("pfft")
+    });
+  }
+
+const BACKEND = "/_tests/tasks.json"; // "https://parnikkapore.neocities.org/_meta/idonotexist";
+
+class TaskList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      fetchDone: false,
+      tasks: [],
+    }
+  }
+
+  componentDidMount() {
+    const authedApiOptions = {
+      method: 'GET',
+//       body: JSON.stringify({ session: "dummy" }),
+      headers: { 'Content-Type': 'application/json' }
+    }
+    fetch(BACKEND, authedApiOptions)
+      .then(response => response.ok ? response.json() : [])
+      .then(tasks => { this.setState({ fetchDone: true, tasks: tasks }); })
+      .catch(error => this.setState({fetchDone: true, tasks: [`*WIP* Error fetching task list - ${error.name}: ${error.message}`]}));
+  }
+
+  render(props) {
+    return (
+      <Collection>
+        {this.state.tasks.map(
+          (v, i) => <TaskEntry key={i} id={i}>{v}</TaskEntry>)
+        }
+      </Collection>
+    )
+  }
 }
