@@ -1,26 +1,79 @@
 // Editor screen
 
 import React from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
+
 import { Icon } from "react-materialize";
-import { Navbar } from "../deps/Navbar";
+import Headerbar from "../components/Headerbar";
 import TaskEditor from "../components/TaskEditor";
 
-export default function Edit(props) {
+export default function Edit_wrapper(props) {
   return (
-    <>
-      <Navbar logo={" "} className="left">
-        <a href="/"><Icon>arrow_back</Icon></a>
-        <span className="brand-logo" style={{ padding: "0px 8px" }}>Edit task</span>
-      </Navbar>
-      <div className="container">
-        <TaskEditor onSubmit={() => alert(`Hey!`)} cur={{
-      name: "Hi hi",
-      desc: "",
-      tags: ["test1", "test2"],
-      done: false,
-      due: new Date('May 4, 2025 0:00:00'),
-    }}/>
-      </div>
-    </>
+    <Edit taskID={useParams().taskID} navigate={useNavigate()}/>
   )
-}; 
+}
+
+class Edit extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      fetchDone: false,
+      taskDetails: undefined,
+    };
+  }
+  
+  isNewTask() {
+    return this.props.taskID === "new";
+  }
+  
+  componentDidMount() {
+    if (this.isNewTask()) {
+      this.setState({ fetchDone: true, taskDetails: undefined });
+    } else {
+      const BACKEND = "/_tests/getDetails.json"
+      const authedApiOptions = {
+        method: 'GET',
+        //       body: JSON.stringify({ session: "dummy", id: this.props.taskId}),
+        headers: { 'Content-Type': 'application/json' }
+      }
+      fetch(BACKEND, authedApiOptions)
+        .then(response => response.ok ? response.json() : [])
+        .then(taskDetails => { this.setState({ fetchDone: true, taskDetails: taskDetails }); })
+        .catch(error => { console.log("!b"); this.setState({ fetchDone: true, taskDetails: undefined }) });
+    }
+  }
+
+  handleSubmit(newTask) {
+    alert(`Saving edits is not implemented yet. Fakesaving task ${JSON.stringify(newTask)} as ${this.isNewTask() ? "new" : "old"} task`);
+
+    const BACKEND = "/_tests/tasks.json"
+    const endpoint = BACKEND + (this.isNewTask() ? "_create" : "_update");
+    const _Options = {
+      method: 'POST',
+      body: JSON.stringify(Object.assign(
+        { session: "Dummy" },
+        this.state.form
+      )),
+      headers: { 'Content-Type': 'application/json' }
+    }
+    
+    this.setState({ fetchDone: false });
+    
+    fetch(endpoint, _Options)
+      .then(response => response.ok ? response.json() : [])
+      .then(tasks => { this.setState({ fetchDone: true }); this.props.navigate("/"); })
+      .catch(error => { this.setState({ fetchDone: true }); alert(`*WIP* saving task - ${error.name}: ${error.message}`) });
+  }
+  
+  render(props) {
+    return (
+      <>
+        <Headerbar backButton title={this.isNewTask() ? "Add task" : "Edit task"} />
+        <div className="container">
+          <TaskEditor onSubmit={(task) => this.handleSubmit(task)} key={this.state.taskDetails} cur={this.state.taskDetails} />
+        </div>
+      </>
+    )
+  }
+}

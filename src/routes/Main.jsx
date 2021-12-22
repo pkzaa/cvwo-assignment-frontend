@@ -1,7 +1,7 @@
 // Main screen
 
 import React from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { Collection, CollectionItem, Col, Row, Button, Icon } from "react-materialize";
 // import { Navbar, NavItem, Icon } from "react-materialize";
@@ -9,11 +9,12 @@ import { Navbar, NavSearch, NavButton } from "../deps/Navbar";
 import TaskEntry from "../components/TaskEntry";
 
 export default function Main(props) {
+  const navigate = useNavigate();
   return (
     <>
       <Navbar logo="CVTasks">
         <NavSearch />
-        <NavButton href="/login">Login</NavButton>
+        <NavButton to="/login">Login</NavButton>
       </Navbar>
       <div className="container">
         <Row>
@@ -24,7 +25,7 @@ export default function Main(props) {
         <Button large floating
           className="red fixed-action-btn"
           icon={<Icon>add</Icon>}
-          onClick={() => window.location.href = "/edit/new"}
+          onClick={() => navigate("/edit/new")}
         />
       </div>
     </>
@@ -64,7 +65,7 @@ class TaskList extends React.Component {
     return (
       <Collection>
         {this.state.tasks.map(
-          (v, i) => <TaskEntry key={i} id={i}>{v}</TaskEntry>)
+          (v, i) => <TaskEntry key={v.id} id={v.id}>{v.name}</TaskEntry>)
         }
       </Collection>
     )

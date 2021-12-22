@@ -2,10 +2,8 @@
 // Reimplemented manually because the React interface broke
 
 import React from "react";
-
-function fallback(value, fallbackValue) {
-  return value ? value : fallbackValue;
-}
+import { Link } from "react-router-dom";
+import { fallback } from "../deps/lib"
 
 export function Navbar(props) {
   return (
@@ -34,7 +32,7 @@ export function NavSearch(props) {
 
 export function NavButton(props) {
   return (
-    <a className="waves-effect waves-light btn" href={props.href}>{props.children}</a>
+    <Link className="waves-effect waves-light btn" to={props.to}>{props.children}</Link>
   )
 };
 
