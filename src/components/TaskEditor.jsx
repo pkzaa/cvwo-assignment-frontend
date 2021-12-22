@@ -16,6 +16,7 @@ export default class TaskEditor extends React.Component {
       done: false,
       due: new Date(), // now
     });
+    
     this.state.form.tags = this.state.form.tags.join();
     this.state.form.due = new Date(this.state.form.due);
   }

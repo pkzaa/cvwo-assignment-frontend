@@ -6,37 +6,50 @@ import { useNavigate } from "react-router-dom";
 import { Collection, CollectionItem, Col, Row, Button, Icon } from "react-materialize";
 // import { Navbar, NavItem, Icon } from "react-materialize";
 import { Navbar, NavSearch, NavButton } from "../deps/Navbar";
+
 import TaskEntry from "../components/TaskEntry";
+import LoadingWrapper from "../components/LoadingWrapper";
 
-export default function Main(props) {
+export default function Main_wrapper(props) {
   const navigate = useNavigate();
-  return (
-    <>
-      <Navbar logo="CVTasks">
-        <NavSearch />
-        <NavButton to="/login">Login</NavButton>
-      </Navbar>
-      <div className="container">
-        <Row>
-          <Col s={12}>
-            <TaskList />
-          </Col>
-        </Row>
-        <Button large floating
-          className="red fixed-action-btn"
-          icon={<Icon>add</Icon>}
-          onClick={() => navigate("/edit/new")}
-        />
-      </div>
-    </>
-  )
-};
+  return (<Main navigate={navigate} />);
+}
 
-function fakefetch(a, b) {
-    return new Promise((resolve, reject) => {
-      resolve(["a", "b", "c"]); // Array(20).fill("pfft")
-    });
+export class Main extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      searchAll: "",
+    }
   }
+
+  handleSearchAllChange(value) {
+    this.setState({ searchAll: value });
+  }
+
+  render(props) {
+    return (
+      <>
+        <Navbar logo="CVTasks">
+          <NavSearch onChange={(v) => this.handleSearchAllChange(v)} />
+          <NavButton to="/login">Login</NavButton>
+        </Navbar>
+        <div className="container">
+          <Row>
+            <Col s={12}>
+              <TaskList searchAll={this.state.searchAll} />
+            </Col>
+          </Row>
+          <Button large floating
+            className="red fixed-action-btn"
+            icon={<Icon>add</Icon>}
+            onClick={() => this.props.navigate("/edit/new")}
+          />
+        </div>
+      </>
+    )
+  }
+}
 
 const BACKEND = "/_tests/tasks.json"; // "https://parnikkapore.neocities.org/_meta/idonotexist";
 
@@ -52,22 +65,34 @@ class TaskList extends React.Component {
   componentDidMount() {
     const authedApiOptions = {
       method: 'GET',
-//       body: JSON.stringify({ session: "dummy" }),
+      //       body: JSON.stringify({ session: "dummy" }),
       headers: { 'Content-Type': 'application/json' }
     }
     fetch(BACKEND, authedApiOptions)
       .then(response => response.ok ? response.json() : [])
       .then(tasks => { this.setState({ fetchDone: true, tasks: tasks }); })
-      .catch(error => this.setState({fetchDone: true, tasks: [`*WIP* Error fetching task list - ${error.name}: ${error.message}`]}));
+      .catch(error => this.setState({ fetchDone: true, tasks: [`*WIP* Error fetching task list - ${error.name}: ${error.message}`] }));
+  }
+
+  taskMatches(string) {
+    const stringIncludesInsensitive = (a, b) => a.toLowerCase().includes(b.toLowerCase());
+    return (taskOverview) => (
+      !string ||
+      stringIncludesInsensitive(taskOverview.name, string) ||
+      taskOverview.tags.filter((tag) => stringIncludesInsensitive(tag, string)).length > 0
+    )
   }
 
   render(props) {
+    const tasks = this.state.tasks.filter(this.taskMatches(this.props.searchAll));
     return (
-      <Collection>
-        {this.state.tasks.map(
-          (v, i) => <TaskEntry key={v.id} id={v.id}>{v.name}</TaskEntry>)
-        }
-      </Collection>
+      <LoadingWrapper done={this.state.fetchDone}>
+        <Collection>
+          {tasks.map(
+            (v, i) => <TaskEntry key={v.id} id={v.id}>{v.name}</TaskEntry>)
+          }
+        </Collection>
+      </LoadingWrapper>
     )
   }
 }
